@@ -1,28 +1,21 @@
 #!/usr/bin/python3
-"""
-canUnlockAll(boxes)
-
-Determines if all the boxes can be opened.
-
-Parameters:
-    boxes (list of list of int): A list of lists where each sublist represents
-    a box and contains keys to other boxes.
-
-Returns:
-    bool: True if all boxes can be opened, False otherwise.
-"""
+"""Method that determines if all the boxes can be opened"""
 
 
 def canUnlockAll(boxes):
-    n = len(boxes)
-    opened = set([0])
-    keys = list(boxes[0])
+    if not isinstance(boxes, list):
+        return False
 
-    while keys:
-        key = keys.pop(0)
-        if key < n and key not in opened:
-            if key not in opened:
-                opened.add(key)
-                keys.extend(boxes[key])
+    if len(boxes) == 0:
+        return False
 
-    return len(opened) == n
+    keys = [0]
+    opened = set(keys)
+
+    for key in keys:
+        for new_key in boxes[key]:
+            if new_key not in opened and new_key < len(boxes):
+                opened.add(new_key)
+                keys.append(new_key)
+
+    return len(opened) == len(boxes)
