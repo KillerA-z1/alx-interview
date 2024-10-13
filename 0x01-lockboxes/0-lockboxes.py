@@ -1,3 +1,18 @@
+#!/usr/bin/python3
+"""
+canUnlockAll(boxes)
+
+Determines if all the boxes can be opened.
+
+Parameters:
+    boxes (list of list of int): A list of lists where each sublist represents
+    a box and contains keys to other boxes.
+
+Returns:
+    bool: True if all boxes can be opened, False otherwise.
+"""
+
+
 def canUnlockAll(boxes):
     n = len(boxes)
     opened = set([0])  # Start with the first box opened
