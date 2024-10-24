@@ -15,7 +15,6 @@ def print_stats(total_size, status_codes):
     Returns:
         None
     """
-    """Prints the statistics"""
     print("File size: {}".format(total_size))
     for code in sorted(status_codes.keys()):
         if status_codes[code] > 0:
