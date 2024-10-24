@@ -1,51 +1,66 @@
 #!/usr/bin/python3
-"""Prints the statistics of file size and status codes."""
+"""script that reads stdin line by line and computes metrics"""
 import sys
+import re
 
 
-def print_stats(total_size, status_codes):
+def print_stats(size, stats):
     """
-    Prints the statistics of file size and status codes.
+    Print accumulated statistics.
 
     Args:
-        total_size (int): The total size of the file.
-        status_codes (dict): A dictionary where keys are HTTP status codes
-                             and values are the counts of each status code.
+        size (int): The total file size.
+        stats (dict): A dictionary containing the statistics to be printed. 
+                      Keys are the statistic names and values are their counts.
 
-    Returns:
-        None
+    Prints:
+        The total file size and the statistics in a sorted order by key.
+        Only prints statistics where the count is not zero.
     """
-    print("File size: {}".format(total_size))
-    for code in sorted(status_codes.keys()):
-        if status_codes[code] > 0:
-            print("{}: {}".format(code, status_codes[code]))
+    print('File size: {:d}'.format(size))
+    for key in sorted(stats.keys()):
+        if stats[key] != 0:
+            print('{}: {}'.format(key, stats[key]))
 
 
-total_size = 0
-status_codes = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
-line_count = 0
+i = 0
+sum_file_size = 0
+status_code = {
+    '200': 0,
+    '301': 0,
+    '400': 0,
+    '401': 0,
+    '403': 0,
+    '404': 0,
+    '405': 0,
+    '500': 0
+}
+
+pattern = r'^[\d.]+\s+-\s+\[[^\]]+\]\s+"GET\s+/projects/260\s+HTTP/1\.1"\s+(\d+)\s+(\d+)$'
 
 try:
     for line in sys.stdin:
-        parts = line.split()
-        if len(parts) < 7:
-            continue
-
         try:
-            file_size = int(parts[-1])
-            status_code = int(parts[-2])
-            total_size += file_size
-            if status_code in status_codes:
-                status_codes[status_code] += 1
-        except ValueError:
+            # Use regex to extract status code and file size
+            match = re.match(pattern, line.strip())
+            if match:
+                status = match.group(1)
+                file_size = match.group(2)
+                
+                # Update metrics if status code is valid
+                if status in status_code:
+                    status_code[status] += 1
+                sum_file_size += int(file_size)
+                
+                i += 1
+                if i == 10:
+                    print_stats(sum_file_size, status_code)
+                    i = 0
+                    
+        except (ValueError, IndexError):
             continue
-
-        line_count += 1
-        if line_count % 10 == 0:
-            print_stats(total_size, status_codes)
-
+            
 except KeyboardInterrupt:
-    print_stats(total_size, status_codes)
-    raise
-
-print_stats(total_size, status_codes)
+    pass
+finally:
+    print_stats(sum_file_size, status_code)
