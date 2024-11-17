@@ -2,25 +2,26 @@
 
 const request = require('request');
 
-const movieId = process.argv[2];
-const url = `https://swapi-api.alx-tools.com/api/films/${movieId}/`;
+const movieId = process.argv[2] + '/';
+const starWarsApiBaseUrl = 'https://swapi-api.alx-tools.com/api/films/';
 
-request(url, (error, response, body) => {
-  if (error) {
-    console.error('Error:', error);
-    return;
-  }
-  const film = JSON.parse(body);
-  const characters = film.characters;
+// Makes an API request to get film information
+request(starWarsApiBaseUrl + movieId, async function (error, response, filmData) {
+  if (error) return console.error(error);
 
-  characters.forEach((characterUrl) => {
-    request(characterUrl, (error, response, body) => {
-      if (error) {
-        console.error('Error:', error);
-        return;
-      }
-      const character = JSON.parse(body);
-      console.log(character.name);
+  // Parse the response body to get the list of character URLs
+  const characterUrlList = JSON.parse(filmData).characters;
+
+  // Iterate through the character URLs and fetch character information
+  for (const characterUrl of characterUrlList) {
+    await new Promise(function (resolve, reject) {
+      request(characterUrl, function (error, response, characterData) {
+        if (error) return console.error(error);
+
+        // Parse the character information and print the character's name
+        console.log(JSON.parse(characterData).name);
+        resolve();
+      });
     });
-  });
+  }
 });
